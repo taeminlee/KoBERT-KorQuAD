@@ -59,6 +59,14 @@ $ python3 run_squad.py --model_type kobert \
 $ python3 evaluate_v1_0.py {$data_dir}/KorQuAD_v1.0_dev.json {$output_dir}/predictions_.json
 ```
 
+### 3. Serve
+
+```console
+$ python3 serve.py serve --task question-answering --model models --tokenizer models
+```
+
+serving api docs url : http://localhost:8888/docs
+
 ## Results
 
 - Dev set에서 테스트한 결과

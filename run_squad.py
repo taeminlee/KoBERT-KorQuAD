@@ -616,6 +616,7 @@ def main():
     )
     parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
     parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
+    parser.add_argument("--do_serve", action="store_true", help="Whether to run serve.")
     parser.add_argument(
         "--evaluate_during_training", action="store_true", help="Run evaluation during training at each logging step."
     )
@@ -853,17 +854,29 @@ def main():
 
         logger.info("Evaluate the following checkpoints: %s", checkpoints)
 
-        for checkpoint in checkpoints:
-            # Reload the model
-            global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
-            model = model_class.from_pretrained(checkpoint)  # , force_download=True)
-            model.to(args.device)
+        model = model_class.from_pretrained(args.output_dir)  # , force_download=True)
+        tokenizer = tokenizer_class.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
+        model.to(args.device)
 
-            # Evaluate
-            result = evaluate(args, model, tokenizer, prefix=global_step)
+        result = evaluate(args, model, tokenizer)
+        results = result
 
-            result = dict((k + ("_{}".format(global_step) if global_step else ""), v) for k, v in result.items())
-            results.update(result)
+        # for checkpoint in checkpoints:
+        #     # Reload the model
+        #     global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
+        #     model = model_class.from_pretrained(checkpoint)  # , force_download=True)
+        #     model.to(args.device)
+
+        #     # Evaluate
+        #     result = evaluate(args, model, tokenizer, prefix=global_step)
+
+        #     result = dict((k + ("_{}".format(global_step) if global_step else ""), v) for k, v in result.items())
+        #     results.update(result)
+    
+    if args.do_serve:
+        logger.info("Loading checkpoint %s for evaluation", args.model_name_or_path)
+        checkpoints = [args.model_name_or_path]
+
 
     logger.info("Results: {}".format(results))
 
